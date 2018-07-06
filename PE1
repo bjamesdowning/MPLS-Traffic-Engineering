@@ -1,0 +1,307 @@
+version 15.6
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname PE1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vrf definition A
+ rd 1000:1000
+ route-target export 100:100
+ route-target import 100:100
+ !
+ address-family ipv4
+ exit-address-family
+!         
+vrf definition B
+ rd 2000:2000
+ route-target export 200:200
+ route-target import 200:200
+ !
+ address-family ipv4
+ exit-address-family
+!
+!
+no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!         
+no ip icmp rate-limit unreachable
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name test.local
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+mpls traffic-eng tunnels
+mpls traffic-eng reoptimize timers frequency 600
+!
+!
+!
+!
+username cisco privilege 15 password 0 cisco
+!
+redundancy
+bfd-template single-hop MPLS_TE
+ interval min-tx 50 min-rx 50 multiplier 3
+!
+!
+no cdp log mismatch duplex
+!
+ip tcp synwait-time 5
+!
+class-map match-all ALL_TRAFFIC
+ match any 
+!
+policy-map MARK_B
+ class ALL_TRAFFIC
+  set mpls experimental imposition 7
+policy-map MARK_A
+ class ALL_TRAFFIC
+  set mpls experimental imposition 1
+!
+! 
+!
+!
+!
+!
+!         
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ description MPLS TE LOOP
+ ip address 10.10.10.10 255.255.255.255
+ ip ospf network point-to-point
+ ip ospf 100 area 0
+!
+interface Tunnel1
+ description P1
+ ip address 100.0.23.2 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 100 area 0
+ mpls traffic-eng tunnels
+ tunnel source GigabitEthernet0/2
+ tunnel destination 10.0.23.3
+!
+interface Tunnel2
+ description PE2
+ ip address 100.0.24.2 255.255.255.0
+ ip ospf network point-to-point
+ ip ospf 100 area 0
+ mpls traffic-eng tunnels
+ bfd template MPLS_TE
+ tunnel source GigabitEthernet0/4
+ tunnel destination 10.0.24.4
+!
+interface Tunnel3
+ description P2
+ ip address 100.0.25.2 255.255.255.0
+ ip ospf 100 area 0
+ mpls traffic-eng tunnels
+ tunnel source GigabitEthernet0/3
+ tunnel destination 10.0.25.5
+!
+interface Tunnel1000
+ description MASTER
+ ip unnumbered Loopback0
+ tunnel mode mpls traffic-eng
+ tunnel destination 40.40.40.40
+ tunnel mpls traffic-eng path-option 10 dynamic
+ tunnel mpls traffic-eng exp-bundle master
+ tunnel mpls traffic-eng exp-bundle member Tunnel10001
+ tunnel mpls traffic-eng exp-bundle member Tunnel10002
+ no routing dynamic
+!
+interface Tunnel10001
+ description VRF A
+ ip unnumbered Loopback0
+ tunnel mode mpls traffic-eng
+ tunnel destination 40.40.40.40
+ tunnel mpls traffic-eng path-option 5 explicit name PRIMARY
+ tunnel mpls traffic-eng path-option 10 explicit name SECONDARY_A
+ tunnel mpls traffic-eng exp 1
+ no routing dynamic
+!
+interface Tunnel10002
+ description VRF B
+ ip unnumbered Loopback0
+ tunnel mode mpls traffic-eng
+ tunnel destination 40.40.40.40
+ tunnel mpls traffic-eng path-option 5 explicit name PRIMARY
+ tunnel mpls traffic-eng path-option 10 explicit name SECONDARY_B
+ tunnel mpls traffic-eng exp 7
+ no routing dynamic
+!
+interface GigabitEthernet0/0
+ vrf forwarding A
+ ip address 10.1.12.2 255.255.255.0
+ duplex auto
+ speed auto
+ media-type rj45
+ service-policy input MARK_A
+!
+interface GigabitEthernet0/1
+ vrf forwarding B
+ ip address 10.2.12.2 255.255.255.0
+ duplex auto
+ speed auto
+ media-type rj45
+ service-policy input MARK_B
+!
+interface GigabitEthernet0/2
+ description P1
+ ip address 10.0.23.2 255.255.255.0
+ ip ospf network point-to-point
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/3
+ description P2
+ ip address 10.0.25.2 255.255.255.0
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/4
+ description PE2
+ ip address 10.0.24.2 255.255.255.0
+ duplex auto
+ speed auto
+ media-type rj45
+!
+router ospf 100
+ mpls ldp autoconfig area 0
+ mpls traffic-eng router-id Loopback0
+ mpls traffic-eng area 0
+ router-id 10.10.10.10
+ bfd all-interfaces
+!
+router bgp 100
+ bgp router-id 10.10.10.10
+ bgp log-neighbor-changes
+ no bgp default ipv4-unicast
+ neighbor 40.40.40.40 remote-as 100
+ neighbor 40.40.40.40 update-source Loopback0
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family vpnv4
+  neighbor 40.40.40.40 activate
+  neighbor 40.40.40.40 send-community extended
+ exit-address-family
+ !
+ address-family ipv4 vrf A
+  neighbor 10.1.12.1 remote-as 1
+  neighbor 10.1.12.1 activate
+  neighbor 10.1.12.1 send-community extended
+ exit-address-family
+ !
+ address-family ipv4 vrf B
+  neighbor 10.2.12.1 remote-as 1
+  neighbor 10.2.12.1 activate
+  neighbor 10.2.12.1 send-community extended
+ exit-address-family
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip tftp source-interface GigabitEthernet0/0
+ip route 40.40.40.40 255.255.255.255 Tunnel1000
+!
+ip explicit-path name PRIMARY enable
+ next-address 100.0.24.4
+!
+ip explicit-path name SECONDARY_A enable
+ next-address 100.0.23.3
+ next-address 100.0.34.4
+!
+ip explicit-path name SECONDARY_B enable
+ next-address 100.0.25.5
+ next-address 100.0.45.4
+ip ssh source-interface GigabitEthernet0/0
+ip scp server enable
+!
+ip sla 1
+ icmp-echo 100.0.24.4 source-ip 100.0.24.2
+!
+!
+!
+control-plane
+!
+banner exec ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+banner incoming ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+banner login ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login local
+ transport input ssh
+ transport output ssh
+line vty 5 15
+ login local
+ transport input ssh
+ transport output ssh
+!
+no scheduler allocate
+!
+end
