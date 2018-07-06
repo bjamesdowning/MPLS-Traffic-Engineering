@@ -1,0 +1,286 @@
+BEFORE FAILURE:
+
+PE1
+PE1#sho mpls traffic-eng tunnels 
+
+Name: MASTER                              (Tunnel1000) Destination: 40.40.40.40
+  Status: Master
+    Admin: up         Oper: up     Signalling: N/A
+
+    Member Tunnels:         Member Autoroute: Inactive
+ 
+    Tunnel10001: Config Exp:  1 
+    Tunnel10002: Config Exp:  7
+
+
+  History:
+    Tunnel:
+      Time since created: 4 minutes, 57 seconds
+      Number of LSP IDs (Tun_Instances) used: 0
+
+Name: VRF A                               (Tunnel10001) Destination: 40.40.40.40
+  Status:
+    Admin: up         Oper: up     Path: valid       Signalling: connected
+    path option 5, type explicit PRIMARY (Basis for Setup, path weight 1000)
+    path option 10, type explicit SECONDARY_A
+
+  Config Parameters:
+    Bandwidth: 0        kbps (Global)  Priority: 7  7   Affinity: 0x0/0xFFFF
+    Metric Type: TE (default)
+    AutoRoute:  disabled  LockDown: disabled  Loadshare: 0        bw-based
+    auto-bw: disabled
+  Active Path Option Parameters:
+    State: explicit path option 5 is active
+    BandwidthOverride: disabled  LockDown: disabled  Verbatim: disabled
+
+
+  InLabel  :  - 
+  OutLabel : Tunnel2, implicit-null
+  RSVP Signalling Info:
+       Src 10.10.10.10, Dst 40.40.40.40, Tun_Id 10001, Tun_Instance 15
+    RSVP Path Info:
+      My Address: 100.0.24.2   
+      Explicit Route: 100.0.24.4 40.40.40.40 
+      Record   Route:   NONE
+      Tspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+    RSVP Resv Info:
+      Record   Route:   NONE
+      Fspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+  History:
+    Tunnel:
+      Time since created: 4 minutes, 57 seconds
+      Time since path change: 15 seconds
+      Number of LSP IDs (Tun_Instances) used: 15
+    Current LSP:
+      Uptime: 18 seconds
+      Selection: reoptimization
+    Prior LSP:
+      ID: path option 10 [14]
+      Removal Trigger: reoptimization completed
+
+Name: VRF B                               (Tunnel10002) Destination: 40.40.40.40
+  Status:
+    Admin: up         Oper: up     Path: valid       Signalling: connected
+    path option 5, type explicit PRIMARY (Basis for Setup, path weight 1000)
+    path option 10, type explicit SECONDARY_B
+
+  Config Parameters:
+    Bandwidth: 0        kbps (Global)  Priority: 7  7   Affinity: 0x0/0xFFFF
+    Metric Type: TE (default)
+    AutoRoute:  disabled  LockDown: disabled  Loadshare: 0        bw-based
+    auto-bw: disabled
+  Active Path Option Parameters:
+    State: explicit path option 5 is active
+    BandwidthOverride: disabled  LockDown: disabled  Verbatim: disabled
+
+
+  InLabel  :  - 
+  OutLabel : Tunnel2, implicit-null
+  RSVP Signalling Info:
+       Src 10.10.10.10, Dst 40.40.40.40, Tun_Id 10002, Tun_Instance 11
+    RSVP Path Info:
+      My Address: 100.0.24.2   
+      Explicit Route: 100.0.24.4 40.40.40.40 
+      Record   Route:   NONE
+      Tspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+    RSVP Resv Info:
+      Record   Route:   NONE
+      Fspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+  History:
+    Tunnel:
+      Time since created: 4 minutes, 57 seconds
+      Time since path change: 15 seconds
+      Number of LSP IDs (Tun_Instances) used: 11
+    Current LSP:
+      Uptime: 18 seconds
+      Selection: reoptimization
+    Prior LSP:
+      ID: path option 10 [10]
+      Removal Trigger: reoptimization completed
+PE1#sho mpls tr
+PE1#sho mpls traffic-eng su
+PE1#sho mpls traffic-eng tun
+PE1#sho mpls traffic-eng tunnels sum
+PE1#sho mpls traffic-eng tunnels summary 
+Signalling Summary:
+    LSP Tunnels Process:            running
+    Passive LSP Listener:           running
+    RSVP Process:                   running
+    Forwarding:                     enabled
+    Head: 3 interfaces, 2 active signalling attempts, 2 established
+          4 activations, 2 deactivations
+          0 SSO recovery attempts, 0 SSO recovered
+    Midpoints: 0, Tails: 0
+    Periodic reoptimization:        every 600 seconds, next in 289 seconds
+    Periodic FRR Promotion:         Not Running
+    Periodic auto-bw collection:    every 300 seconds, next in 293 seconds
+PE1#
+
+
+CE1:
+
+CE1#traceroute vrf A 2.2.2.2 source 1.1.1.1
+Type escape sequence to abort.
+Tracing the route to 2.2.2.2
+VRF info: (vrf in name/id, vrf out name/id)
+  1 10.1.12.2 10 msec 5 msec 7 msec
+  2 10.1.14.4 [MPLS: Label 21 Exp 1] 13 msec 6 msec 12 msec
+  3 10.1.14.1 12 msec 10 msec 14 msec
+CE1#traceroute vrf B 2.2.2.2 source 1.1.1.1
+Type escape sequence to abort.
+Tracing the route to 2.2.2.2
+VRF info: (vrf in name/id, vrf out name/id)
+  1 10.2.12.2 7 msec 5 msec 6 msec
+  2 10.2.14.4 [MPLS: Label 22 Exp 7] 10 msec 13 msec 13 msec
+  3 10.2.14.1 5 msec 8 msec 9 msec
+CE1#
+
+
+
+AFTER FAILURE:
+
+CE1:
+
+CE1#traceroute vrf A 2.2.2.2 source 1.1.1.1
+Type escape sequence to abort.
+Tracing the route to 2.2.2.2
+VRF info: (vrf in name/id, vrf out name/id)
+  1 10.1.12.2 12 msec 7 msec 3 msec
+  2 100.0.23.3 [MPLS: Labels 16/21 Exp 1] 17 msec 8 msec 8 msec
+  3 10.1.14.4 [MPLS: Label 21 Exp 1] 4 msec 11 msec 13 msec
+  4 10.1.14.1 12 msec 7 msec 10 msec
+CE1#traceroute vrf B 2.2.2.2 source 1.1.1.1
+Type escape sequence to abort.
+Tracing the route to 2.2.2.2
+VRF info: (vrf in name/id, vrf out name/id)
+  1 10.2.12.2 12 msec 9 msec 8 msec
+  2 100.0.25.5 [MPLS: Labels 16/22 Exp 7] 13 msec 10 msec 8 msec
+  3 10.2.14.4 [MPLS: Label 22 Exp 7] 13 msec 6 msec 10 msec
+  4 10.2.14.1 10 msec 13 msec 11 msec
+CE1#
+
+PE1:
+
+PE1#sho mpls traffic-eng tunnels 
+
+Name: MASTER                              (Tunnel1000) Destination: 40.40.40.40
+  Status: Master
+    Admin: up         Oper: up     Signalling: N/A
+
+    Member Tunnels:         Member Autoroute: Inactive
+ 
+    Tunnel10001: Config Exp:  1 
+    Tunnel10002: Config Exp:  7
+
+
+  History:
+    Tunnel:
+      Time since created: 13 minutes, 41 seconds
+      Number of LSP IDs (Tun_Instances) used: 0
+
+Name: VRF A                               (Tunnel10001) Destination: 40.40.40.40
+  Status:
+    Admin: up         Oper: up     Path: valid       Signalling: connected
+    path option 10, type explicit SECONDARY_A (Basis for Setup, path weight 2000)
+    path option 5, type explicit PRIMARY
+
+  Config Parameters:
+    Bandwidth: 0        kbps (Global)  Priority: 7  7   Affinity: 0x0/0xFFFF
+    Metric Type: TE (default)
+    AutoRoute:  disabled  LockDown: disabled  Loadshare: 0        bw-based
+    auto-bw: disabled
+  Active Path Option Parameters:
+    State: explicit path option 10 is active
+    BandwidthOverride: disabled  LockDown: disabled  Verbatim: disabled
+
+
+  InLabel  :  - 
+  OutLabel : Tunnel1, 16
+  RSVP Signalling Info:
+       Src 10.10.10.10, Dst 40.40.40.40, Tun_Id 10001, Tun_Instance 12
+    RSVP Path Info:
+      My Address: 100.0.23.2   
+      Explicit Route: 100.0.23.3 100.0.34.4 40.40.40.40 
+      Record   Route:   NONE
+      Tspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+    RSVP Resv Info:
+      Record   Route:   NONE
+      Fspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+  History:
+    Tunnel:
+      Time since created: 13 minutes, 41 seconds
+      Time since path change: 13 minutes, 26 seconds
+      Number of LSP IDs (Tun_Instances) used: 12
+    Current LSP:
+      Uptime: 13 minutes, 26 seconds
+
+Name: VRF B                               (Tunnel10002) Destination: 40.40.40.40
+  Status:
+    Admin: up         Oper: up     Path: valid       Signalling: connected
+    path option 10, type explicit SECONDARY_B (Basis for Setup, path weight 2000)
+    path option 5, type explicit PRIMARY
+
+  Config Parameters:
+    Bandwidth: 0        kbps (Global)  Priority: 7  7   Affinity: 0x0/0xFFFF
+    Metric Type: TE (default)
+    AutoRoute:  disabled  LockDown: disabled  Loadshare: 0        bw-based
+    auto-bw: disabled
+  Active Path Option Parameters:
+    State: explicit path option 10 is active
+    BandwidthOverride: disabled  LockDown: disabled  Verbatim: disabled
+
+          
+  InLabel  :  - 
+  OutLabel : Tunnel3, 16
+  RSVP Signalling Info:
+       Src 10.10.10.10, Dst 40.40.40.40, Tun_Id 10002, Tun_Instance 10
+    RSVP Path Info:
+      My Address: 100.0.25.2   
+      Explicit Route: 100.0.25.5 100.0.45.4 40.40.40.40 
+      Record   Route:   NONE
+      Tspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+    RSVP Resv Info:
+      Record   Route:   NONE
+      Fspec: ave rate=0 kbits, burst=1000 bytes, peak rate=0 kbits
+  History:
+    Tunnel:
+      Time since created: 13 minutes, 41 seconds
+      Time since path change: 13 minutes, 26 seconds
+      Number of LSP IDs (Tun_Instances) used: 10
+    Current LSP:
+      Uptime: 13 minutes, 26 seconds
+PE1#sho mpls traffic-eng tunnels sum
+PE1#sho mpls traffic-eng tunnels summary 
+Signalling Summary:
+    LSP Tunnels Process:            running
+    Passive LSP Listener:           running
+    RSVP Process:                   running
+    Forwarding:                     enabled
+    Head: 3 interfaces, 2 active signalling attempts, 2 established
+          2 activations, 0 deactivations
+          0 SSO recovery attempts, 0 SSO recovered
+    Midpoints: 0, Tails: 0
+    Periodic reoptimization:        every 600 seconds, next in 327 seconds
+    Periodic FRR Promotion:         Not Running
+    Periodic auto-bw collection:    every 300 seconds, next in 35 seconds
+PE1# 
+
+
+BFD SESSION FAILURE:
+
+PE1#
+*Jul  6 20:17:54.225: %BFDFSM-6-BFD_SESS_DOWN: BFD-SYSLOG: BFD session ld:1 handle:1,is going Down Reason: DETECT TIMER EXPIRED
+*Jul  6 20:17:54.229: %BFD-6-BFD_SESS_DESTROYED: BFD-SYSLOG: bfd_session_destroyed,  ld:1 neigh proc:OSPF, handle:1 act
+PE1#
+*Jul  6 20:17:54.229: %OSPF-5-ADJCHG: Process 100, Nbr 40.40.40.40 on Tunnel2 from FULL to DOWN, Neighbor Down: BFD node down
+PE1#
+*Jul  6 20:17:54.851: %BFDFSM-6-BFD_SESS_UP: BFD-SYSLOG: BFD session ld:1 handle:1 is going UP
+PE1#
+*Jul  6 20:17:57.969: %OSPF-5-ADJCHG: Process 100, Nbr 40.40.40.40 on Tunnel2 from LOADING to FULL, Loading Done
+PE1#
+*Jul  6 20:17:57.972: %BFD-6-BFD_SESS_CREATED: BFD-SYSLOG: bfd_session_created, neigh 100.0.24.4 proc:OSPF, idb:Tunnel2 handle:2 act
+PE1#
+
+
+
+
