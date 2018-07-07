@@ -4,3 +4,6 @@ Topology:
               P1
 CE1 -- PE1 <  -  > PE2 -- CE2
               P2
+
+
+Link to post: http://networktechstudy.com/home/mpls-te
