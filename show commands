@@ -1,5 +1,36 @@
 BEFORE FAILURE:
 
+MPLS FORWARING TABLE:
+
+PE1#sho mpls forwarding-table 
+Local      Outgoing   Prefix           Bytes Label   Outgoing   Next Hop    
+Label      Label      or Tunnel Id     Switched      interface              
+16         No Label   1.1.1.1/32[V]    756           Gi0/0      10.1.12.1   
+17         No Label   1.1.1.1/32[V]    1512          Gi0/1      10.2.12.1   
+18         Pop Label  20.20.20.20/32   0             Tu1        point2point 
+19    [T]  No Label   40.40.40.40/32   0             Tu1000     point2point 
+20         Pop Label  50.50.50.50/32   0             Tu3        point2point 
+21         Pop Label  100.0.34.0/24    0             Tu1        point2point 
+           Pop Label  100.0.34.0/24    0             Tu2        point2point 
+22         Pop Label  100.0.45.0/24    0             Tu2        point2point 
+           Pop Label  100.0.45.0/24    0             Tu3        point2point 
+
+[T]	Forwarding through a LSP tunnel.
+	View additional labelling info with the 'detail' option
+PE1#
+
+RSVP NEIGHBORS
+
+PE1#sho ip rsvp neighbor 
+Neighbor        Encapsulation  Time since msg rcvd/sent
+100.0.23.3      Raw IP         00:11:23   00:11:17  
+100.0.24.4      Raw IP         00:00:21   00:00:13  
+100.0.25.5      Raw IP         00:11:42   00:11:17  
+
+* Neighbors inactive for more than one hour are not shown.
+  Use the "inactive" keyword to display them.
+
+
 PE1
 PE1#sho mpls traffic-eng tunnels 
 
