@@ -299,18 +299,13 @@ PE1#
 
 BFD SESSION FAILURE:
 
-PE1#
+
 *Jul  6 20:17:54.225: %BFDFSM-6-BFD_SESS_DOWN: BFD-SYSLOG: BFD session ld:1 handle:1,is going Down Reason: DETECT TIMER EXPIRED
 *Jul  6 20:17:54.229: %BFD-6-BFD_SESS_DESTROYED: BFD-SYSLOG: bfd_session_destroyed,  ld:1 neigh proc:OSPF, handle:1 act
-PE1#
 *Jul  6 20:17:54.229: %OSPF-5-ADJCHG: Process 100, Nbr 40.40.40.40 on Tunnel2 from FULL to DOWN, Neighbor Down: BFD node down
-PE1#
 *Jul  6 20:17:54.851: %BFDFSM-6-BFD_SESS_UP: BFD-SYSLOG: BFD session ld:1 handle:1 is going UP
-PE1#
 *Jul  6 20:17:57.969: %OSPF-5-ADJCHG: Process 100, Nbr 40.40.40.40 on Tunnel2 from LOADING to FULL, Loading Done
-PE1#
 *Jul  6 20:17:57.972: %BFD-6-BFD_SESS_CREATED: BFD-SYSLOG: bfd_session_created, neigh 100.0.24.4 proc:OSPF, idb:Tunnel2 handle:2 act
-PE1#
 
 
 
